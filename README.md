@@ -1,75 +1,123 @@
-#  Academic Assignment & Grading Management System
+# Academic Assignment & Grading Management System
 
-A robust, full-stack RESTful web application built with **Node.js**, **TypeScript**, **Express**, and **MongoDB**, featuring a **React / HTML5** client interface. The system automates the assignment lifecycle—enabling teachers to publish coursework, grade submissions, and review class metrics, while allowing students to submit projects, work with partners, and track their academic performance.
+A full-stack RESTful web application for managing the complete academic assignment lifecycle. The system enables teachers to create and manage assignments, review student submissions, provide grades and feedback, and monitor class performance. Students can view available assignments, submit coursework, work with partners, and track their grades and feedback.
 
-Designed using a **Layered Architecture (Model-Service-Router)**, the application enforces strict Role-Based Access Control (RBAC), custom middleware pipelines, data validation, and centralized error handling.
-
----
-
-##  Table of Contents
-- [Tech Stack & Architecture](#-tech-stack--architecture)
-- [Key Features](#-key-features)
-- [Database Schemas & Virtuals](#-database-schemas--virtuals)
-- [Middleware Pipeline](#-middleware-pipeline)
-- [API Reference](#-api-reference)
-- [Execution & Setup Guide](#-execution--setup-guide)
-- [Client Usage & Pre-Seeded Credentials](#-client-usage--pre-seeded-credentials)
+The application is built using a **Layered Architecture (Model-Service-Router)** and implements **JWT authentication, Role-Based Access Control (RBAC), input validation, custom middleware, and centralized error handling**.
 
 ---
 
-##  Tech Stack & Architecture
+## Table of Contents
 
-### **Core Technologies**
-* **Backend:** Node.js, TypeScript (ES6+), Express.js
-* **Database:** MongoDB, Mongoose ODM
-* **Security:** JSON Web Tokens (JWT), `bcrypt` password hashing
-* **Frontend:** React / HTML5, CSS3, JavaScript (ES6+)
-
-### **Layered Architecture (Model-Service-Router)**
-* **Router Layer (`/routes`):** Manages HTTP routing, parameter extraction, and middleware binding.
-* **Service Layer (`/services`):** Encapsulates business rules, statistical computations, and MongoDB queries.
-* **Model Layer (`/models`):** Defines Mongoose schemas, relationships (`ref`), constraints, and virtual fields.
-* **Middleware Layer (`/middleware`):** Handles global logging, payload validation, JWT authentication, RBAC authorization, and error catching.
+* [Tech Stack & Architecture](#-tech-stack--architecture)
+* [Key Features](#-key-features)
+* [Database Schemas & Virtuals](#-database-schemas--virtuals)
+* [Middleware Pipeline](#-middleware-pipeline)
+* [API Reference](#-api-reference)
+* [Execution & Setup Guide](#-execution--setup-guide)
+* [Client Usage & Demo Credentials](#-client-usage--demo-credentials)
 
 ---
 
-##  Key Features
+## Tech Stack & Architecture
 
-###  Security & Role-Based Access
-* **JWT Authentication:** Secure token generation and header verification.
-* **Role-Based Access Control:** Strict route segregation between `Teacher` and `Student` users.
-* **Input Validation:** Enforced password complexity (8+ chars, letters and numbers) and duplicate account checks.
+### Core Technologies
 
-###  Teacher Role Capabilities
-* **Assignment Creation:** Publish assignments with dynamic deadline checks (`isOpen` virtual field).
-* **Submission Review:** View student submissions with populated student and assignment data (`populate`).
-* **Grading & Feedback:** Assign grades and detailed feedback by student ID and assignment ID.
-* **Analytics:** Compute overall class averages through service aggregation logic.
+* **Backend:** Node.js, TypeScript, Express.js
+* **Database:** MongoDB, Mongoose
+* **Authentication & Security:** JSON Web Tokens (JWT), bcrypt
+* **Frontend:** React, JavaScript/TypeScript, HTML5, CSS3
 
-###  Student Role Capabilities
-* **Coursework Navigation:** View all open assignments available for submission.
-* **Submission Portal:** Submit GitHub repository links with support for optional team partners (`partnerId`).
-* **Grade Tracking:** Review personal grades and feedback (as primary submitter or tagged partner) alongside overall class averages.
+### Layered Architecture
 
----
+The application follows a layered architecture that separates responsibilities across the following components:
 
-##  Database Schemas & Virtuals
+* **Router Layer (`/routes`):** Handles HTTP routing, request parameters, and middleware binding.
+* **Service Layer (`/services`):** Contains business logic, database operations, and statistical calculations.
+* **Model Layer (`/models`):** Defines Mongoose schemas, relationships, validation rules, and virtual fields.
+* **Middleware Layer (`/middleware`):** Handles logging, authentication, authorization, validation, and error handling.
 
-| Model | Primary Fields | Relationships (`ref`) | Dynamic Virtual Fields |
-| :--- | :--- | :--- | :--- |
-| **User** | `userId`, `name`, `email`, `password`, `role` | — | Encrypted password storage, unique email/userId validation, role enum (`Student` / `Teacher`). |
-| **Assignment** | `title`, `description`, `dueDate`, `createdDate` | — | **`isOpen`**: Computed boolean evaluating if `dueDate >= Date.now()`. |
-| **Submission** | `assignmentId`, `studentId`, `githubLink`, `partner`, `grade`, `feedback` | `Assignment`, `User` | **`isGraded`**: Computed boolean evaluating if `grade` field exists. |
+This separation improves **maintainability, scalability, and code organization**.
 
 ---
 
-##  Middleware Pipeline
+## Key Features
 
-1. **Global Logger Middleware:** Logs HTTP method, URL path, and timestamp for all incoming requests.
-2. **Registration Validation Middleware:** Validates password complexity and checks existing `email` or `userId` records before registering.
-3. **Authentication Middleware (`authMiddleware`):** Extracts and verifies Bearer JWT tokens, attaching `_id` and `role` to `req.user`.
-4. **Authorization Middleware (`roleMiddleware`):** Verifies `req.user.role` against endpoint requirements (e.g., `'Teacher'`).
-5. **Centralized Error Handling Middleware:** Traps runtime errors and returns structured JSON responses with corresponding HTTP status codes (400, 401, 403, 404, 500).
+### Security & Role-Based Access Control
+
+* JWT-based authentication with Bearer tokens.
+* Role-Based Access Control (RBAC) for **Teacher** and **Student** users.
+* Protected routes based on user roles.
+* Password hashing using **bcrypt**.
+* Registration validation and duplicate account prevention.
+* Centralized error handling with appropriate HTTP status codes.
+
+### Teacher Capabilities
+
+* Create and publish assignments.
+* Define assignment descriptions and deadlines.
+* View student submissions.
+* Access student and assignment information through populated MongoDB relationships.
+* Assign grades and provide detailed feedback.
+* Calculate and review overall class averages.
+
+### Student Capabilities
+
+* View available assignments.
+* Submit assignments using GitHub repository links.
+* Submit assignments individually or with an optional partner.
+* View personal submissions.
+* Track grades and teacher feedback.
+* View overall class performance statistics.
+
+---
+
+## Database Schemas & Virtuals
+
+| Model          | Primary Fields                                                            | Relationships        | Virtual Fields |
+| :------------- | :------------------------------------------------------------------------ | :------------------- | :------------- |
+| **User**       | `userId`, `name`, `email`, `password`, `role`                             | —                    | —              |
+| **Assignment** | `title`, `description`, `dueDate`, `createdDate`                          | —                    | `isOpen`       |
+| **Submission** | `assignmentId`, `studentId`, `githubLink`, `partner`, `grade`, `feedback` | `Assignment`, `User` | `isGraded`     |
+
+### Virtual Fields
+
+* **`Assignment.isOpen`** — Determines whether an assignment is still open for submission based on its deadline.
+* **`Submission.isGraded`** — Determines whether a submission has received a grade.
+
+---
+
+## Middleware Pipeline
+
+The application uses a custom middleware pipeline to handle common backend concerns:
+
+1. **Global Logger Middleware**
+   Logs the HTTP method, URL path, and timestamp for incoming requests.
+
+2. **Registration Validation Middleware**
+   Validates registration data and prevents duplicate accounts.
+
+3. **Authentication Middleware (`authMiddleware`)**
+   Extracts and verifies the Bearer JWT token and attaches the authenticated user's information to the request.
+
+4. **Authorization Middleware (`roleMiddleware`)**
+   Verifies that the authenticated user has the required role for the requested endpoint.
+
+5. **Centralized Error Handling Middleware**
+   Handles application errors and returns structured responses with appropriate HTTP status codes such as `400`, `401`, `403`, `404`, and `500`.
+
+---
+
+## API Reference
+
+The backend exposes RESTful API endpoints for:
+
+* User registration and authentication
+* Assignment management
+* Student submissions
+* Grading and feedback
+* Student and class statistics
+
+All protected endpoints require a valid JWT authentication token and, where applicable, the appropriate user role.
 
 ---
 
@@ -77,13 +125,13 @@ Designed using a **Layered Architecture (Model-Service-Router)**, the applicatio
 
 ### 1. Backend Server Setup
 
-Run the backend server from the **backend project root**:
+Open a terminal in the **backend project root** and run:
 
 ```bash
 # Install dependencies
 npm install
 
-# Start the Node.js & TypeScript Server
+# Start the backend server
 npx ts-node src/app.ts
 ```
 
@@ -95,13 +143,13 @@ The backend server will run on:
 
 ### 2. Client Setup
 
-Open a **new terminal** in the client project directory:
+Open a **new terminal** in the client project directory and run:
 
 ```bash
 # Install dependencies
 npm install
 
-# Start the client
+# Start the client application
 npm start
 ```
 
@@ -113,36 +161,36 @@ The client application will run on:
 
 ### 3. Running the Application
 
-Both the backend server and the client must be running simultaneously.
+Both the backend and client must be running simultaneously.
 
 1. Start the backend server in one terminal.
-2. Start the client in a second terminal.
-3. Open the client application in your browser:
+2. Start the client application in a second terminal.
+3. Open the application in your browser:
 
 **http://localhost:3000**
 
 ---
 
-## Client Usage & Pre-Seeded Credentials
+## Client Usage & Demo Credentials
 
 ### Registration
 
-If a teacher or student wants to create a new account, click:
+New users can create an account by selecting:
 
 **"Register"**
 
-and complete the registration form.
+and completing the registration form.
 
-### Login
+### Demo Users
 
-The project includes the following pre-seeded users for testing:
+The project includes pre-seeded users for testing the different roles.
 
 #### Teacher
 
 **Email:** `alice@gmail.com`
 **Password:** `123 alice`
 
-After logging in as a teacher, the following features are available:
+The Teacher account provides access to:
 
 * Create assignments
 * View student submissions
@@ -155,10 +203,29 @@ After logging in as a teacher, the following features are available:
 **Email:** `shir@gmail.com`
 **Password:** `1234shir`
 
-After logging in as a student, the following features are available:
+The Student account provides access to:
 
 * View available assignments
 * Submit assignments
 * View personal submissions
 * View grades and feedback
 * View class averages
+
+---
+
+## Project Highlights
+
+This project demonstrates practical experience with:
+
+* Full-stack web development
+* RESTful API design
+* TypeScript and Node.js
+* MongoDB and Mongoose
+* Layered software architecture
+* JWT authentication
+* Role-Based Access Control (RBAC)
+* Middleware design
+* Data validation
+* Error handling
+* Database relationships and aggregation
+* Teacher/student workflow management

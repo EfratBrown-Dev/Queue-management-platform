@@ -73,10 +73,11 @@ Designed using a **Layered Architecture (Model-Service-Router)**, the applicatio
 
 ---
 
-##  Execution & Setup Guide
+## Execution & Setup Guide
 
 ### 1. Backend Server Setup
-Run the server using `ts-node` directly from the project root:
+
+Run the backend server from the **backend project root**:
 
 ```bash
 # Install dependencies
@@ -84,3 +85,80 @@ npm install
 
 # Start the Node.js & TypeScript Server
 npx ts-node src/app.ts
+```
+
+The backend server will run on:
+
+**http://localhost:5000**
+
+---
+
+### 2. Client Setup
+
+Open a **new terminal** in the client project directory:
+
+```bash
+# Install dependencies
+npm install
+
+# Start the client
+npm start
+```
+
+The client application will run on:
+
+**http://localhost:3000**
+
+---
+
+### 3. Running the Application
+
+Both the backend server and the client must be running simultaneously.
+
+1. Start the backend server in one terminal.
+2. Start the client in a second terminal.
+3. Open the client application in your browser:
+
+**http://localhost:3000**
+
+---
+
+## Client Usage & Pre-Seeded Credentials
+
+### Registration
+
+If a teacher or student wants to create a new account, click:
+
+**"Register"**
+
+and complete the registration form.
+
+### Login
+
+The project includes the following pre-seeded users for testing:
+
+#### Teacher
+
+**Email:** `alice@gmail.com`
+**Password:** `123 alice`
+
+After logging in as a teacher, the following features are available:
+
+* Create assignments
+* View student submissions
+* Grade submissions
+* Provide feedback
+* View class statistics
+
+#### Student
+
+**Email:** `shir@gmail.com`
+**Password:** `1234shir`
+
+After logging in as a student, the following features are available:
+
+* View available assignments
+* Submit assignments
+* View personal submissions
+* View grades and feedback
+* View class averages
